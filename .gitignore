@@ -19,3 +19,5 @@
 # Ignore jekyll build output.
 /production
 /.sass-cache
+# Ignore unnecessary files.
+**.docx
