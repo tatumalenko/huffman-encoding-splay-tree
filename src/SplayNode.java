@@ -1,10 +1,13 @@
 /**
  * A Splay based node extension of the TreeNode.
+ *
+ * @see Tree
+ * @see TreeNode
+ * @see SplayTree
  */
 public class SplayNode extends TreeNode {
     /**
      * Constructs a new TreeNode using default parameters.
-     * 
      */
     public SplayNode() {
         this(0, null, null, null);

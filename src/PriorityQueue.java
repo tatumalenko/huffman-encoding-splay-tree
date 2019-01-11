@@ -1,10 +1,10 @@
-// import java.util.Comparator;
-
 /**
  * Priority based implementation of a queue data structure.
  * <p>
  * 
  * Implements the queue using an ArrayList of generic type E.
+ *
+ * @see ArrayList
  */
 public class PriorityQueue<E> {
     /**
@@ -13,7 +13,7 @@ public class PriorityQueue<E> {
     private ArrayList<E> data;
 
     /**
-     * 
+     * Comparator of generic elements to store the `compare` method.
      */
     private Comparator<E> comparator;
 
@@ -91,7 +91,7 @@ public class PriorityQueue<E> {
             data.set(index, data.get(promoted));
             index = promoted;
         }
-        --filled;
+        filled--;
 
         return removed;
     }
@@ -103,6 +103,16 @@ public class PriorityQueue<E> {
      */
     public int size() {
         return filled;
+    }
+
+    /**
+     * Overrides the `toString` method.
+     *
+     * @return the string representation
+     */
+    @Override
+    public String toString() {
+        return data.toString();
     }
 
     /**
@@ -165,16 +175,6 @@ public class PriorityQueue<E> {
         }
 
         return index;
-    }
-
-    /**
-     * Overrides the `toString` method.
-     * 
-     * @return the string representation
-     */
-    @Override
-    public String toString() {
-        return data.toString();
     }
 
     /**

@@ -1,8 +1,9 @@
 /**
  * Abstract a binary tree node data structure superclassing both HuffmanNode and
  * SplayNode.
+ *
+ * @see Tree
  */
-
 public abstract class TreeNode {
     /**
      * Data value for the given node.

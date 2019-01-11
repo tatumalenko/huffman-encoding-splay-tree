@@ -1,7 +1,7 @@
-import java.lang.reflect.Array;
+import java.lang.reflect.Array; // This class' use is the only 'true' way of instantiating an array of generics in Java.
 
 /**
- * Array basedimplementation of a list data structure.
+ * Array based implementation of a list data structure.
  * <p>
  * 
  * Performs dynamic resizing of itself upon adding of any new elements when size
@@ -193,23 +193,26 @@ public class ArrayList<E> {
     public <T> T[] toArray(T[] a) {
         // Count the number of non null elements in array.
         int nonNullSize = 0;
+
         for (int i = 0; i < size(); i++) {
             if (al[i] != null)
                 nonNullSize++;
         }
 
         // Initialize an array of generics using Java's Reflection library.
-        // This is the only way that it can be done in Java, array of generic
-        // types is technically not usually permitted.
+        // This is the only way that it can be done in Java, arrays of generic
+        // types are technically not usually 'possible' otherwise.
         a = (T[]) Array.newInstance(a.getClass().getComponentType(), nonNullSize);
 
         // Assign the elements into new generic array.
         int tempIndex = -1;
+
         for (E e : al) {
             if (e != null) {
                 a[++tempIndex] = (T) e;
             }
         }
+
         return a;
     }
 
@@ -221,9 +224,11 @@ public class ArrayList<E> {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(size() > 0 ? al[0].toString().length() * (size()) : 0);
+
         for (int i = 0; i < size(); i++) {
             sb.append((al[i] == null ? null : al[i].toString()) + "\n");
         }
+
         return sb.toString();
     }
 
@@ -258,11 +263,11 @@ public class ArrayList<E> {
         al.add(nodes[0]);
         System.out.println(al.totalLength() + " " + al.size() + " " + al.capacity() + " " + al.lastIndex);
 
-        al = new ArrayList<HuffmanNode>();
+        al = new ArrayList<>();
         al.add(nodes[1]);
         System.out.println(al.totalLength() + " " + al.size() + " " + al.capacity() + " " + al.lastIndex);
 
-        al = new ArrayList<HuffmanNode>(12);
+        al = new ArrayList<>(12);
         al.add(nodes[1]);
         System.out.println(al.totalLength() + " " + al.size() + " " + al.capacity() + " " + al.lastIndex);
         al.set(0, nodes[2]);
@@ -283,6 +288,5 @@ public class ArrayList<E> {
 
         al.remove(4);
         System.out.println(al);
-
     }
 }

@@ -1,26 +1,19 @@
 import java.util.Scanner;
 import java.io.File;
-import java.util.Arrays;
-import java.util.TreeSet;
-import java.util.Set;
 
 /**
  * A Splay Code extension of the Tree class. Implements the Splay tree algorithm
  * using a binary tree.
  * <p>
  * 
- * Uses a HashMap as a container collection to store the HuffmanNode objects for
- * fast constant time access. The hashing function is a trivial one based on the
- * conversion of the expected Character based key to ASCII integer.
- * <p>
- * 
- * The building of the tree is accomplished using a PriorityQueue that bases its
- * priority of the HuffmanNode objects based on the overriden Comparator
- * interface method `compare`.
- * 
+ * Unlike traditional splay tree algorithms, this one does not perform and extra zig
+ * operation (if needed) to push the node up the root if it is just below it (i.e.
+ * a child of the root) when it ends up there. This has no practical use of course
+ * other than being cosmetically different than traditional implementations.
+ *
  * @see Tree
- * @see HashMap
- * @see PriorityQueue
+ * @see TreeNode
+ * @see SplayNode
  */
 public class SplayTree extends Tree {
     /**
@@ -38,8 +31,6 @@ public class SplayTree extends Tree {
      */
     private int zigzagCount = 0;
 
-    private Set<Integer> set = new TreeSet<Integer>();
-
     /**
      * Constructs a new SplayTree with default attributes.
      */
@@ -56,6 +47,7 @@ public class SplayTree extends Tree {
         TreeNode node = root;
         TreeNode parent = null;
 
+        // Increment tree size if not already in it.
         if (!search(data))
             size++;
 
@@ -73,16 +65,16 @@ public class SplayTree extends Tree {
         node = new SplayNode();
         node.data = data;
         node.parent = parent;
+
         if (parent == null)
             root = node;
         else if (data < parent.data)
             parent.left = node;
-        else // data >= parent.data
+        else // (data >= parent.data) This take care of duplicates.
             parent.right = node;
 
-        // Splay the node and increment the size.
+        // Splay the node.
         splay(node);
-
     }
 
     /**
@@ -91,6 +83,8 @@ public class SplayTree extends Tree {
      * @param data the data value
      */
     public void remove(int data) {
+        // No splaying needed to be done here since it will be done in the
+        // call to `searchNode` method.
         remove(searchNode(data));
     }
 
@@ -101,10 +95,7 @@ public class SplayTree extends Tree {
      * @return whether node with data value was found
      */
     public boolean search(int data) {
-        TreeNode node = searchNode(data);
-        // System.out.println(n);
-        return node != null;
-        // return searchNode(data) != null;
+        return searchNode(data) != null;
     }
 
     /**
@@ -118,7 +109,7 @@ public class SplayTree extends Tree {
 
     /**
      * Traverses the tree in post-order and prints to the console the number
-     * comparisons, zigzig, zigzag operations at the provided number of operations.
+     * comparisons, zig-zig, and zig-zag operations at the provided number of operations.
      * 
      * @param stepCount the number of completed operations
      */
@@ -135,111 +126,76 @@ public class SplayTree extends Tree {
 
     /**
      * Removes specified node from the tree.
-     * 
-     * @param node the node
+     *
+     * @param node the node to remove
      */
     private void remove(TreeNode node) {
         if (node == null)
             return;
 
-        // System.out.println("\nROOT BEFORE: " + root);
+        TreeNode temp;
+        TreeNode child;
+        TreeNode parent;
 
-        splay(node);
-        boolean stopRule = node.parent != null;
+        // Account for the 3 cases in which the node to remove has children.
+        if (node.left != null && node.right != null) {
+            // Node has both left and right children.
+            temp = node.left;
 
-        if (stopRule && node.parent.parent == null) {
-            if (node == node.parent.left)
-                zigRight(node, node.parent);
-            else
-                zigLeft(node, node.parent);
-            stopRule = false;
-        }
+            // Find the rightmost leaf node.
+            while (temp.right != null)
+                temp = temp.right;
 
-        // System.out.println("STOPRULE: " + stopRule + "\nROOT: " + root);
-
-        if ((node.left != null) && (node.right != null)) {
-            compareCount++;
-            TreeNode minNode = node.left;
-
-            while (minNode.right != null) {
-                compareCount++;
-                minNode = minNode.right;
-            }
-
-            minNode.right = node.right;
-            node.right.parent = minNode;
-
-            if (stopRule) {
-                node.left.parent = root;
-                root.left = node.left;
-
-            } else {
-                node.left.parent = null;
-                root = node.left;
-            }
-        } else if (node.right != null) {
-            compareCount++;
-
-            if (stopRule) {
-                node.right.parent = root;
-                root.right = node.right;
-            } else {
-                node.right.parent = null;
-                root = node.right;
-            }
+            // Reassign the value to the rightmost leaf node value.
+            child = temp.left;
+            node.data = temp.data;
         } else if (node.left != null) {
-            compareCount++;
-
-            if (stopRule) {
-                node.left.parent = root;
-                root.left = node.left;
-
-            } else {
-                node.left.parent = null;
-                root = node.left;
-            }
+            // Node to remove has only a left child.
+            temp = node;
+            child = node.left;
         } else {
-            if (stopRule) {
-                if (root.left == node)
-                    root.left = null;
-                else
-                    root.right = null;
-            } else {
-                root = null;
-            }
+            // Node to remove has only a right child.
+            temp = node;
+            child = node.right;
         }
 
-        size--;
-        // System.out.println("ROOT AFTER: " + root);
+        // Take care of link to parent branch.
+        parent = temp.parent;
+        if (child != null)
+            child.parent = parent;
+
+        if (parent == null) {
+            // Case where the node is the root or a child of the root.
+            root = child;
+            return;
+        }
+
+        // Link parent's child to appropriate node.
+        if (temp == parent.left)
+            parent.left = child;
+        else
+            parent.right = child;
+
+        size--; // Decrement the tree size.
     }
 
     /**
      * Searches for a node with given data value and returns it (or null).
      * 
      * @param data the data value
+     * @return the found node (or null)
      */
     private TreeNode searchNode(int data) {
-        TreeNode n = root;
+        TreeNode node = root;
 
-        // System.out.println("ROOT: " + (root.data));
-        // System.out.println("DATA: " + data);
-
-        // if (data == n.data)
-        // return n;
-
-        while (n != null) {
-            // System.out.println("DATA: " + n.data);
-            // System.out.println("LEFT: " + n.left);
-            // System.out.println("RIGHT: " + n.right);
-            compareCount++;
-            compareCount++;
-            if (data < n.data) {
-                n = n.left;
-            } else if (data > n.data) {
-                n = n.right;
+        while (node != null) {
+            if (data < node.data) {
+                node = node.left;
+            } else if (data > node.data) {
+                node = node.right;
             } else {
-                splay(n);
-                return n;
+                splay(node);
+                return node;
             }
         }
 
@@ -254,7 +210,6 @@ public class SplayTree extends Tree {
      */
     private void zigRight(TreeNode child, TreeNode parent) {
         if (parent.parent != null) {
-            // compareCount++;
             compareCount++;
             if (parent == parent.parent.left) // P is a left child of G
                 parent.parent.left = child;
@@ -262,10 +217,8 @@ public class SplayTree extends Tree {
                 parent.parent.right = child;
         }
 
-        if (child.right != null) {
-            // compareCount++;
+        if (child.right != null)
             child.right.parent = parent;
-        }
 
         child.parent = parent.parent;
         parent.parent = child;
@@ -282,15 +235,14 @@ public class SplayTree extends Tree {
     private void zigLeft(TreeNode child, TreeNode parent) {
         if (parent.parent != null) {
             compareCount++;
-            // compareCount++;
             if (parent == parent.parent.left) {
                 parent.parent.left = child;
             } else
                 parent.parent.right = child;
         }
-        if (child.left != null) {
+
+        if (child.left != null)
             child.left.parent = parent;
-        }
 
         child.parent = parent.parent;
         parent.parent = child;
@@ -352,6 +304,7 @@ public class SplayTree extends Tree {
     private static String[] processOperations(String fileName) {
         String[] operations;
         int fileLines = 0;
+
         try {
             File file = new File(fileName);
             Scanner fileScanner = new Scanner(file);
@@ -412,11 +365,9 @@ public class SplayTree extends Tree {
 
             switch (action) {
             case 'a':
-                splayTree.set.add(Integer.parseInt(operation.substring(1)));
                 splayTree.insert(Integer.parseInt(operation.substring(1)));
                 break;
             case 'r':
-                splayTree.set.remove(Integer.parseInt(operation.substring(1)));
                 splayTree.remove(Integer.parseInt(operation.substring(1)));
                 break;
             case 'f':
@@ -437,13 +388,5 @@ public class SplayTree extends Tree {
 
         if (stepToTraverse == -2)
             splayTree.postOrderTraverse(stepCount);
-
-        System.out.println("Size: " + splayTree.size());
-        // System.out.println(splayTree.set);
-        // System.out.println(Arrays.toString());
-    }
-
-    private int[] toArray(TreeNode root) {
-        return new int[0];
     }
 }

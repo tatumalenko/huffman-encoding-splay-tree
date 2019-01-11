@@ -1,10 +1,11 @@
-// import java.util.Comparator;
-
 /**
  * A Huffman based node extension of the TreeNode and implementation of the
  * Comparator interface.
+ *
+ * @see Tree
+ * @see Huffman
+ * @see TreeNode
  */
-
 public class HuffmanNode extends TreeNode implements Comparator<HuffmanNode> {
     /**
      * Character (ASCII) value representing the node.
@@ -17,7 +18,7 @@ public class HuffmanNode extends TreeNode implements Comparator<HuffmanNode> {
     public int frequency;
 
     /**
-     * Iccurrence index (0-based) of the character's first appearance in a given
+     * Occurrence index (0-based) of the character's first appearance in a given
      * text.
      */
     public int occurrence;

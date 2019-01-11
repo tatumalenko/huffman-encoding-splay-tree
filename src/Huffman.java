@@ -1,5 +1,3 @@
-
-// import java.util.Comparator;
 import java.util.Scanner;
 import java.io.File;
 
@@ -14,12 +12,16 @@ import java.io.File;
  * <p>
  * 
  * The building of the tree is accomplished using a PriorityQueue that bases its
- * priority of the HuffmanNode objects based on the overriden Comparator
+ * priority of the HuffmanNode objects based on the overridden Comparator
  * interface method `compare`.
  * 
  * @see Tree
+ * @see TreeNode
+ * @see HuffmanNode
  * @see HashMap
  * @see PriorityQueue
+ * @see Comparator
+ * @see ArrayList
  */
 public class Huffman extends Tree {
     /**
@@ -31,7 +33,7 @@ public class Huffman extends Tree {
      * Constructs a new Huffman with an empty `codeMap`.
      */
     public Huffman() {
-        codeMap = new HashMap<String>();
+        codeMap = new HashMap<>();
     }
 
     /**
@@ -49,87 +51,6 @@ public class Huffman extends Tree {
         buildTree(buildPriorityQueue(map));
         assignCodes((HuffmanNode) root, "");
         buildCodeMap((HuffmanNode) root);
-    }
-
-    /**
-     * Builds the Huffman tree by polling each child node off the priority queue and
-     * inserting the newly constructed node joining them and adding it back to the
-     * queue to ensure proper priority order is established for next loop iteration.
-     * 
-     * @param pq the priority queue which stores tree nodes used to build tree
-     */
-    private void buildTree(PriorityQueue<HuffmanNode> pq) {
-        int occurrenceCounter = pq.size() - 1;
-        HuffmanNode internal, left, right;
-
-        while (pq.size() > 1) {
-            // Poll both children.
-            left = pq.poll();
-            right = pq.poll();
-            // Construct new HuffmanNode acting as parent to both `left` and
-            // `right` nodes with combined frequency and new occurrence index.
-            internal = new HuffmanNode(' ', left.frequency + right.frequency, ++occurrenceCounter, null, null, left,
-                    right);
-
-            pq.add(internal); // Add to queue.
-        }
-        if (pq.size() < 1) {
-            // Queue is empty, don't bother.
-            root = null;
-        }
-        if (pq.size() == 1) {
-            // Only one element in queue, pop it off and assign to root of tree.
-            root = pq.poll();
-        }
-    }
-
-    /**
-     * Returns a priority queue by simply adding the elements found in the provided
-     * map containing the HuffmanNode objects. Priority queue constructed using a
-     * provided Comparator instance which defines the overriden `compare` method
-     * inside the HuffmanNode class.
-     * 
-     * @param map the character-key based map containing the HuffmanNode values
-     */
-    private PriorityQueue<HuffmanNode> buildPriorityQueue(HashMap<HuffmanNode> map) {
-        Comparator<HuffmanNode> comparator = new HuffmanNode();
-        PriorityQueue<HuffmanNode> pq = new PriorityQueue<HuffmanNode>(comparator);
-
-        for (char c : map.toKeyArray()) {
-            pq.add(new HuffmanNode(map.get(c)));
-        }
-
-        return pq;
-    }
-
-    /**
-     * Returns a priority map populated with character entries found in the text
-     * file with the provided `fileName`. Not to be misleaded into thinking this map
-     * is ordered by priority, it is simply named this way due to its specific use
-     * to eventually populate a priority queue.
-     * 
-     * @param fileName the name of the text file used to populate map
-     */
-    private static HashMap<HuffmanNode> buildPriorityMap(String fileName) {
-        HashMap<HuffmanNode> map = new HashMap<HuffmanNode>();
-        try {
-            File file = new File(fileName);
-            Scanner fileScanner = new Scanner(file);
-            while (fileScanner.hasNextLine()) {
-                String line = fileScanner.nextLine();
-                for (char c : line.toCharArray()) {
-                    if (map.containsKey(c)) {
-                        map.get(c).frequency = map.get(c).frequency + 1;
-                    } else {
-                        map.put(c, new HuffmanNode(c, 1, (map.size() + 1) - 1, null));
-                    }
-                }
-            }
-            fileScanner.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return map;
     }
 
     /**
@@ -179,25 +100,86 @@ public class Huffman extends Tree {
     }
 
     /**
-     * Entry point wrapper for pre-order traversal printing of the tree.
+     * Builds the Huffman tree by polling each child node off the priority queue and
+     * inserting the newly constructed node joining them and adding it back to the
+     * queue to ensure proper priority order is established for next loop iteration.
+     *
+     * @param pq the priority queue which stores tree nodes used to build tree
      */
-    public void preOrderTraverse() {
-        preOrderTraverse((HuffmanNode) root);
+    private void buildTree(PriorityQueue<HuffmanNode> pq) {
+        int occurrenceCounter = pq.size() - 1;
+        HuffmanNode internal, left, right;
+
+        while (pq.size() > 1) {
+            // Poll both children.
+            left = pq.poll();
+            right = pq.poll();
+            // Construct new HuffmanNode acting as parent to both `left` and
+            // `right` nodes with combined frequency and new occurrence index.
+            internal = new HuffmanNode(' ', left.frequency + right.frequency, ++occurrenceCounter, null, null, left,
+                    right);
+
+            pq.add(internal); // Add to queue.
+        }
+        if (pq.size() < 1) {
+            // Queue is empty, don't bother.
+            root = null;
+        }
+        if (pq.size() == 1) {
+            // Only one element in queue, pop it off and assign to root of tree.
+            root = pq.poll();
+        }
     }
 
     /**
-     * Traverses the tree in pre-order and prints to the console the node character
-     * and code attributes.
-     * 
-     * @param r the node representing the tip of the subtree being investigated
+     * Returns a priority queue by simply adding the elements found in the provided
+     * map containing the HuffmanNode objects. Priority queue constructed using a
+     * provided Comparator instance which defines the overriden `compare` method
+     * inside the HuffmanNode class.
+     *
+     * @param map the character-key based map containing the HuffmanNode values
+     * @return the priority queue
      */
-    private void preOrderTraverse(HuffmanNode r) {
-        if (r != null) {
-            if (r.character != ' ')
-                System.out.println("'" + (r.character) + "' (" + r.code + ")");
-            preOrderTraverse((HuffmanNode) r.left);
-            preOrderTraverse((HuffmanNode) r.right);
+    private PriorityQueue<HuffmanNode> buildPriorityQueue(HashMap<HuffmanNode> map) {
+        Comparator<HuffmanNode> comparator = new HuffmanNode();
+        PriorityQueue<HuffmanNode> pq = new PriorityQueue<HuffmanNode>(comparator);
+
+        for (char c : map.toKeyArray()) {
+            pq.add(new HuffmanNode(map.get(c)));
         }
+
+        return pq;
+    }
+
+    /**
+     * Returns a priority map populated with character entries found in the text
+     * file with the provided `fileName`. Not to be misleaded into thinking this map
+     * is ordered by priority, it is simply named this way due to its specific use
+     * to eventually populate a priority queue.
+     *
+     * @param fileName the name of the text file used to populate map
+     * @return the priority based map
+     */
+    private static HashMap<HuffmanNode> buildPriorityMap(String fileName) {
+        HashMap<HuffmanNode> map = new HashMap<HuffmanNode>();
+        try {
+            File file = new File(fileName);
+            Scanner fileScanner = new Scanner(file);
+            while (fileScanner.hasNextLine()) {
+                String line = fileScanner.nextLine();
+                for (char c : line.toCharArray()) {
+                    if (map.containsKey(c)) {
+                        map.get(c).frequency = map.get(c).frequency + 1;
+                    } else {
+                        map.put(c, new HuffmanNode(c, 1, (map.size() + 1) - 1, null));
+                    }
+                }
+            }
+            fileScanner.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return map;
     }
 
     /**

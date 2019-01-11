@@ -1,5 +1,3 @@
-import java.util.Arrays;
-
 /**
  * Hash table based implementation of a map data structure.
  * <p>
@@ -12,6 +10,8 @@ import java.util.Arrays;
  * within the map will be limited to the ASCII character encoding set, this will
  * be restricted to an ArrayList of maximum size of 128 keys for every possible
  * unique ASCII character values.
+ *
+ * @see ArrayList
  */
 public class HashMap<T> {
     /**
@@ -34,7 +34,7 @@ public class HashMap<T> {
      * 
      */
     public HashMap() {
-        this.data = new ArrayList<T>(DEFAULT_LENGTH);
+        this.data = new ArrayList<>(DEFAULT_LENGTH);
         this.filled = 0;
     }
 
@@ -87,6 +87,7 @@ public class HashMap<T> {
      */
     public Character[] toKeyArray() {
         int nonNullSize = 0;
+
         for (int i = 0; i < data.totalLength(); i++) {
             if (data.get(i) != null)
                 nonNullSize++;
@@ -94,10 +95,12 @@ public class HashMap<T> {
 
         Character[] temp = new Character[nonNullSize];
         int tempIndex = -1;
+
         for (int i = 0; i < data.totalLength(); i++) {
             if (data.get(i) != null)
                 temp[++tempIndex] = (char) i;
         }
+
         return temp;
     }
 
@@ -119,11 +122,13 @@ public class HashMap<T> {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("{");
+
         for (int i = 0; i < data.totalLength(); i++) {
             if (data.get(i) != null)
                 sb.append("Key: " + (char) i + ", Value: " + data.get(i).toString()
                         + (i != data.size() - 1 ? ",\n" : "}"));
         }
+
         return sb.toString();
     }
 
@@ -160,10 +165,6 @@ public class HashMap<T> {
         HuffmanNode[] nodes2 = map.data.toArray(new HuffmanNode[0]);
         System.out.println("Non null size: " + nodes.length);
         map.put(nodes[2].character, nodes[2]);
-        System.out.println(Arrays.toString(map.toKeyArray()));
-        System.out.println(Arrays.toString(map.toValueArray()));
-
-        System.out.println(Arrays.toString(nodes2));
         System.out.println(map.containsKey('c'));
 
         HashMap<Integer> map2 = new HashMap<Integer>();
